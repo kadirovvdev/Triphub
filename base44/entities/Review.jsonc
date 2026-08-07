@@ -1,0 +1,27 @@
+{
+  "name": "Review",
+  "type": "object",
+  "properties": {
+    "tour_id": {
+      "type": "string"
+    },
+    "traveler_id": {
+      "type": "string"
+    },
+    "rating": {
+      "type": "number",
+      "minimum": 1,
+      "maximum": 5
+    },
+    "comment": {
+      "type": "string",
+      "maxLength": 1500
+    }
+  },
+  "required": [
+    "tour_id",
+    "traveler_id",
+    "rating",
+    "comment"
+  ]
+}

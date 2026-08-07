@@ -1,0 +1,56 @@
+{
+  "name": "OrganizerProfile",
+  "type": "object",
+  "properties": {
+    "full_name": {
+      "type": "string",
+      "minLength": 2,
+      "maxLength": 80
+    },
+    "bio": {
+      "type": "string",
+      "maxLength": 1200
+    },
+    "avatar_url": {
+      "type": "string",
+      "format": "uri"
+    },
+    "cover_url": {
+      "type": "string",
+      "format": "uri"
+    },
+    "phone": {
+      "type": "string",
+      "maxLength": 32
+    },
+    "verification_status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "approved",
+        "rejected"
+      ],
+      "default": "pending"
+    },
+    "verified": {
+      "type": "boolean",
+      "default": false
+    },
+    "rating": {
+      "type": "number",
+      "default": 0
+    },
+    "reviews_count": {
+      "type": "number",
+      "default": 0
+    },
+    "tours_count": {
+      "type": "number",
+      "default": 0
+    }
+  },
+  "required": [
+    "full_name",
+    "verification_status"
+  ]
+}

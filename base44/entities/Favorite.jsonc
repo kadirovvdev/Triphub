@@ -1,0 +1,16 @@
+{
+  "name": "Favorite",
+  "type": "object",
+  "properties": {
+    "tour_id": {
+      "type": "string"
+    },
+    "traveler_id": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "tour_id",
+    "traveler_id"
+  ]
+}

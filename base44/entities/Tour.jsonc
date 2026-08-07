@@ -1,0 +1,136 @@
+{
+  "name": "Tour",
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string",
+      "minLength": 4,
+      "maxLength": 120
+    },
+    "slug": {
+      "type": "string",
+      "minLength": 4,
+      "maxLength": 140
+    },
+    "description": {
+      "type": "string",
+      "minLength": 20,
+      "maxLength": 5000
+    },
+    "category_id": {
+      "type": "string"
+    },
+    "region": {
+      "type": "string",
+      "maxLength": 80
+    },
+    "district": {
+      "type": "string",
+      "maxLength": 80
+    },
+    "meeting_point": {
+      "type": "string",
+      "maxLength": 180
+    },
+    "latitude": {
+      "type": "number"
+    },
+    "longitude": {
+      "type": "number"
+    },
+    "price": {
+      "type": "number",
+      "minimum": 0
+    },
+    "duration": {
+      "type": "string",
+      "maxLength": 40
+    },
+    "start_date": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "end_date": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "maximum_people": {
+      "type": "number",
+      "minimum": 1,
+      "default": 10
+    },
+    "available_seats": {
+      "type": "number",
+      "minimum": 0,
+      "default": 10
+    },
+    "transport": {
+      "type": "string",
+      "enum": [
+        "None",
+        "Bus",
+        "Minivan",
+        "Car",
+        "Train",
+        "Flight"
+      ],
+      "default": "Bus"
+    },
+    "accommodation": {
+      "type": "string",
+      "maxLength": 120
+    },
+    "included": {
+      "type": "string",
+      "maxLength": 2000
+    },
+    "excluded": {
+      "type": "string",
+      "maxLength": 2000
+    },
+    "requirements": {
+      "type": "string",
+      "maxLength": 2000
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "draft",
+        "pending",
+        "approved",
+        "rejected"
+      ],
+      "default": "pending"
+    },
+    "images": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "format": "uri"
+      },
+      "default": []
+    },
+    "rating": {
+      "type": "number",
+      "default": 0
+    },
+    "reviews_count": {
+      "type": "number",
+      "default": 0
+    },
+    "organizer_profile_id": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "title",
+    "slug",
+    "description",
+    "region",
+    "price",
+    "duration",
+    "start_date",
+    "maximum_people",
+    "status"
+  ]
+}

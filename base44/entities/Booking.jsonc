@@ -1,0 +1,53 @@
+{
+  "name": "Booking",
+  "type": "object",
+  "properties": {
+    "tour_id": {
+      "type": "string"
+    },
+    "traveler_id": {
+      "type": "string"
+    },
+    "organizer_profile_id": {
+      "type": "string"
+    },
+    "seats": {
+      "type": "number",
+      "minimum": 1,
+      "default": 1
+    },
+    "full_name": {
+      "type": "string",
+      "maxLength": 80
+    },
+    "phone": {
+      "type": "string",
+      "maxLength": 32
+    },
+    "note": {
+      "type": "string",
+      "maxLength": 500
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "approved",
+        "rejected",
+        "cancelled"
+      ],
+      "default": "pending"
+    },
+    "total_price": {
+      "type": "number",
+      "minimum": 0,
+      "default": 0
+    }
+  },
+  "required": [
+    "tour_id",
+    "traveler_id",
+    "seats",
+    "status"
+  ]
+}
