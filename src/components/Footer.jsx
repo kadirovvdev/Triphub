@@ -15,7 +15,7 @@ export default function Footer() {
     {
       title: "Company",
       links: [
-        { label: "About TripHub", to: "/about" },
+        { label: "About TripNet", to: "/about" },
         { label: "How it works", to: "/about" },
         { label: "Traveler Dashboard", to: "/dashboard" },
       ],
@@ -31,17 +31,17 @@ export default function Footer() {
               <span className="grid h-9 w-9 place-items-center rounded-xl bg-primary text-primary-foreground">
                 <Plane size={18} />
               </span>
-              <span className="text-lg font-bold">Trip<span className="text-emerald-600">Hub</span></span>
+              <span className="text-lg font-bold">Trip<span className="text-emerald-600">Net</span></span>
             </Link>
             <p className="mt-4 max-w-sm text-sm text-muted-foreground">
-              TripHub is Uzbekistan's marketplace for verified mini tours — discover the Silk Road,
+              TripNet is Uzbekistan's marketplace for verified mini tours — discover the Silk Road,
               mountains, deserts and ancient cities, curated by trusted local organizers.
             </p>
             <div className="mt-4 flex items-center gap-2 text-sm text-muted-foreground">
               <MapPin size={15} /> Tashkent, Uzbekistan
             </div>
             <div className="mt-1 flex items-center gap-2 text-sm text-muted-foreground">
-              <Mail size={15} /> hello@triphub.uz
+              <Mail size={15} /> kadirovvdev@gmail.com
             </div>
           </div>
 
@@ -62,7 +62,7 @@ export default function Footer() {
         </div>
 
         <div className="mt-10 flex flex-col items-center justify-between gap-3 border-t border-border pt-6 text-xs text-muted-foreground sm:flex-row">
-          <p>© {new Date().getFullYear()} TripHub Uzbekistan. All rights reserved.</p>
+          <p>© {new Date().getFullYear()} TripNet Uzbekistan. All rights reserved.</p>
           <div className="flex items-center gap-3">
             <Compass size={14} />
             <Mountain size={14} />

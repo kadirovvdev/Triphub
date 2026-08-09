@@ -30,3 +30,26 @@ dist-ssr
 .env
 .vite
 base44/.app.jsonc
+venv
+
+
+# Python
+__pycache__/
+*.py[cod]
+
+# Local uploads
+backend/uploads/
+
+# Environment secrets
+.env
+.env.*
+!.env.example
+backend/.env
+
+# macOS
+.DS_Store
+
+# Python virtual environments
+venv/
+.venv/
+backend/venv/

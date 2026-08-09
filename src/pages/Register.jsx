@@ -1,129 +1,237 @@
-import React, { useState } from "react";
-import { Link } from "react-router-dom";
-import { base44 } from "@/api/base44Client";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { UserPlus, Mail, Lock, Loader2 } from "lucide-react";
-import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
+import React, {
+  useState,
+} from "react";
+
+import {
+  Link,
+  useNavigate,
+} from "react-router-dom";
+
+import {
+  apiPost,
+} from "@/api/apiClient";
+
+import {
+  Button,
+} from "@/components/ui/button";
+
+import {
+  Input,
+} from "@/components/ui/input";
+
+import {
+  Label,
+} from "@/components/ui/label";
+
+import {
+  UserPlus,
+  Mail,
+  Lock,
+  Loader2,
+} from "lucide-react";
+
 import AuthLayout from "@/components/AuthLayout";
-import GoogleIcon from "@/components/GoogleIcon";
-import { toast } from "@/components/ui/use-toast";
 import { safeReturnTo } from "@/lib/authReturnTo";
 
-export default function Register() {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
-  const [error, setError] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [showOtp, setShowOtp] = useState(false);
-  const [otpCode, setOtpCode] = useState("");
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+export default function Register() {
+  const navigate = useNavigate();
+
+  const [email, setEmail] =
+    useState("");
+
+  const [password, setPassword] =
+    useState("");
+
+  const [
+    confirmPassword,
+    setConfirmPassword,
+  ] = useState("");
+
+  const [role, setRole] =
+    useState("traveler");
+
+  const [error, setError] =
+    useState("");
+
+  const [loading, setLoading] =
+    useState(false);
+
+
+  // ============================================================
+  // REGISTER
+  // ============================================================
+
+  const handleSubmit = async (
+    event
+  ) => {
+    event.preventDefault();
+
     setError("");
-    if (password !== confirmPassword) {
-      setError("Passwords do not match");
+
+    const cleanEmail =
+      email
+        .trim()
+        .toLowerCase();
+
+
+    if (!cleanEmail) {
+      setError(
+        "Email is required."
+      );
+
       return;
     }
-    setLoading(true);
-    try {
-      await base44.auth.register({ email, password });
-      setShowOtp(true);
-    } catch (err) {
-      setError(err.message || "Registration failed");
-    } finally {
-      setLoading(false);
-    }
-  };
 
-  const handleVerify = async () => {
-    setError("");
+
+    if (!password) {
+      setError(
+        "Password is required."
+      );
+
+      return;
+    }
+
+
+    if (
+      password.length < 6
+    ) {
+      setError(
+        "Password must be at least 6 characters."
+      );
+
+      return;
+    }
+
+
+    if (
+      password !==
+      confirmPassword
+    ) {
+      setError(
+        "Passwords do not match."
+      );
+
+      return;
+    }
+
+
+    if (
+      ![
+        "traveler",
+        "organizer",
+      ].includes(role)
+    ) {
+      setError(
+        "Invalid account type."
+      );
+
+      return;
+    }
+
+
     setLoading(true);
+
+
     try {
-      const result = await base44.auth.verifyOtp({ email, otpCode });
-      if (result?.access_token) {
-        base44.auth.setToken(result.access_token);
+      const result =
+        await apiPost(
+          "/auth/register",
+          {
+            email:
+              cleanEmail,
+
+            password,
+
+            role,
+
+            phone:
+              null,
+
+            bio:
+              null,
+
+            avatar_url:
+              null,
+          }
+        );
+
+
+      const returnTo =
+        safeReturnTo();
+
+
+      const searchParams =
+        new URLSearchParams();
+
+      searchParams.set(
+        "email",
+        cleanEmail
+      );
+
+      searchParams.set(
+        "role",
+        role
+      );
+
+
+      if (
+        returnTo &&
+        returnTo !== "/"
+      ) {
+        searchParams.set(
+          "returnTo",
+          returnTo
+        );
       }
-      window.location.href = safeReturnTo();
+
+
+      navigate(
+        `/verify-email?${searchParams.toString()}`,
+        {
+          replace: true,
+
+          state: {
+            devCode:
+              result?.dev_verification_code ||
+              "",
+          },
+        }
+      );
+
     } catch (err) {
-      setError(err.message || "Invalid verification code");
+      console.error(
+        "REGISTER ERROR:",
+        err
+      );
+
+
+      setError(
+        err?.message ||
+        "Registration failed."
+      );
+
     } finally {
       setLoading(false);
     }
   };
 
-  const handleResend = async () => {
-    setError("");
-    try {
-      await base44.auth.resendOtp(email);
-      toast({
-        title: "Code sent",
-        description: "Check your email for the new code.",
-      });
-    } catch (err) {
-      setError(err.message || "Failed to resend code");
-    }
-  };
 
-  const handleGoogle = () => {
-    base44.auth.loginWithProvider("google", safeReturnTo());
-  };
+  const returnTo =
+    safeReturnTo();
 
-  if (showOtp) {
-    return (
-      <AuthLayout
-        icon={Mail}
-        title="Verify your email"
-        subtitle={`We sent a code to ${email}`}
-      >
-        {error && (
-          <div className="mb-4 p-3 rounded-lg bg-destructive/10 text-destructive text-sm">
-            {error}
-          </div>
-        )}
-        <div className="flex justify-center mb-6">
-          <InputOTP
-            maxLength={6}
-            value={otpCode}
-            onChange={setOtpCode}
-            autoFocus
-            autoComplete="one-time-code"
-          >
-            <InputOTPGroup>
-              <InputOTPSlot index={0} />
-              <InputOTPSlot index={1} />
-              <InputOTPSlot index={2} />
-              <InputOTPSlot index={3} />
-              <InputOTPSlot index={4} />
-              <InputOTPSlot index={5} />
-            </InputOTPGroup>
-          </InputOTP>
-        </div>
-        <Button
-          className="w-full h-12 font-medium"
-          onClick={handleVerify}
-          disabled={loading || otpCode.length < 6}
-        >
-          {loading ? (
-            <>
-              <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-              Verifying...
-            </>
-          ) : (
-            "Verify"
-          )}
-        </Button>
-        <p className="text-center text-sm text-muted-foreground mt-4">
-          Didn't receive the code?{" "}
-          <button onClick={handleResend} className="text-primary font-medium hover:underline">
-            Resend
-          </button>
-        </p>
-      </AuthLayout>
-    );
-  }
+
+  const loginUrl =
+    returnTo !== "/"
+      ? `/login?returnTo=${encodeURIComponent(
+          returnTo
+        )}`
+      : "/login";
+
+
+  // ============================================================
+  // RENDER
+  // ============================================================
 
   return (
     <AuthLayout
@@ -133,44 +241,40 @@ export default function Register() {
       footer={
         <>
           Already have an account?{" "}
+
           <Link
-            to={"/login" + (safeReturnTo() !== "/" ? "?returnTo=" + encodeURIComponent(safeReturnTo()) : "")}
-            className="text-primary font-medium hover:underline"
+            to={loginUrl}
+            className="font-medium text-primary hover:underline"
           >
             Log in
           </Link>
         </>
       }
     >
-      <Button
-        variant="outline"
-        className="w-full h-12 text-sm font-medium mb-6"
-        onClick={handleGoogle}
-      >
-        <GoogleIcon className="w-5 h-5 mr-2" />
-        Continue with Google
-      </Button>
-
-      <div className="relative mb-6">
-        <div className="absolute inset-0 flex items-center">
-          <div className="w-full border-t border-border" />
-        </div>
-        <div className="relative flex justify-center text-xs uppercase">
-          <span className="bg-card px-3 text-muted-foreground">or</span>
-        </div>
-      </div>
-
       {error && (
-        <div className="mb-4 p-3 rounded-lg bg-destructive/10 text-destructive text-sm">
+        <div className="mb-4 rounded-lg bg-rose-50 p-3 text-sm text-rose-700">
           {error}
         </div>
       )}
 
-      <form onSubmit={handleSubmit} className="space-y-4">
+
+      <form
+        onSubmit={handleSubmit}
+        className="space-y-4"
+      >
+        {/* EMAIL */}
+
         <div className="space-y-2">
-          <Label htmlFor="email">Email</Label>
+          <Label htmlFor="email">
+            Email
+          </Label>
+
           <div className="relative">
-            <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" aria-hidden="true" />
+            <Mail
+              className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground"
+              aria-hidden="true"
+            />
+
             <Input
               id="email"
               type="email"
@@ -178,48 +282,117 @@ export default function Register() {
               autoFocus
               placeholder="you@example.com"
               value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="pl-10 h-12"
+              onChange={(event) =>
+                setEmail(
+                  event.target.value
+                )
+              }
+              className="h-12 pl-10"
               required
             />
           </div>
         </div>
+
+
+        {/* ROLE */}
+
         <div className="space-y-2">
-          <Label htmlFor="password">Password</Label>
+          <Label htmlFor="role">
+            Account type
+          </Label>
+
+          <select
+            id="role"
+            value={role}
+            onChange={(event) =>
+              setRole(
+                event.target.value
+              )
+            }
+            className="h-12 w-full rounded-md border border-input bg-background px-3 text-sm outline-none focus:border-emerald-400"
+          >
+            <option value="traveler">
+              Traveler
+            </option>
+
+            <option value="organizer">
+              Organizer
+            </option>
+          </select>
+        </div>
+
+
+        {/* PASSWORD */}
+
+        <div className="space-y-2">
+          <Label htmlFor="password">
+            Password
+          </Label>
+
           <div className="relative">
-            <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" aria-hidden="true" />
+            <Lock
+              className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground"
+              aria-hidden="true"
+            />
+
             <Input
               id="password"
               type="password"
               autoComplete="new-password"
               placeholder="••••••••"
               value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="pl-10 h-12"
+              onChange={(event) =>
+                setPassword(
+                  event.target.value
+                )
+              }
+              className="h-12 pl-10"
               required
             />
           </div>
         </div>
+
+
+        {/* CONFIRM PASSWORD */}
+
         <div className="space-y-2">
-          <Label htmlFor="confirm">Confirm Password</Label>
+          <Label htmlFor="confirm">
+            Confirm Password
+          </Label>
+
           <div className="relative">
-            <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" aria-hidden="true" />
+            <Lock
+              className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground"
+              aria-hidden="true"
+            />
+
             <Input
               id="confirm"
               type="password"
               autoComplete="new-password"
               placeholder="••••••••"
               value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-              className="pl-10 h-12"
+              onChange={(event) =>
+                setConfirmPassword(
+                  event.target.value
+                )
+              }
+              className="h-12 pl-10"
               required
             />
           </div>
         </div>
-        <Button type="submit" className="w-full h-12 font-medium" disabled={loading}>
+
+
+        <Button
+          type="submit"
+          className="h-12 w-full font-medium"
+          disabled={loading}
+        >
           {loading ? (
             <>
-              <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+
               Creating account...
             </>
           ) : (

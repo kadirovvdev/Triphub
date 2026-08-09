@@ -1,57 +1,226 @@
-import React, { useState } from "react";
-import { Link, useSearchParams } from "react-router-dom";
-import { base44 } from "@/api/base44Client";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Lock, Loader2, AlertTriangle } from "lucide-react";
+import React, {
+  useState,
+} from "react";
+
+import {
+  Link,
+  useNavigate,
+  useSearchParams,
+} from "react-router-dom";
+
+import {
+  apiPost,
+} from "@/api/apiClient";
+
+import {
+  Button,
+} from "@/components/ui/button";
+
+import {
+  Input,
+} from "@/components/ui/input";
+
+import {
+  Label,
+} from "@/components/ui/label";
+
+import {
+  Lock,
+  Loader2,
+  AlertTriangle,
+  CheckCircle2,
+} from "lucide-react";
+
 import AuthLayout from "@/components/AuthLayout";
 
+
 export default function ResetPassword() {
-  const [searchParams] = useSearchParams();
-  const resetToken = searchParams.get("token");
+  const [
+    searchParams,
+  ] = useSearchParams();
 
-  const [newPassword, setNewPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
-  const [error, setError] = useState("");
-  const [loading, setLoading] = useState(false);
+  const navigate =
+    useNavigate();
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  const resetToken =
+    searchParams.get(
+      "token"
+    );
+
+  const [
+    newPassword,
+    setNewPassword,
+  ] = useState("");
+
+  const [
+    confirmPassword,
+    setConfirmPassword,
+  ] = useState("");
+
+  const [
+    error,
+    setError,
+  ] = useState("");
+
+  const [
+    loading,
+    setLoading,
+  ] = useState(false);
+
+  const [
+    success,
+    setSuccess,
+  ] = useState(false);
+
+
+  // ============================================================
+  // SUBMIT
+  // ============================================================
+
+  const handleSubmit = async (
+    event
+  ) => {
+    event.preventDefault();
+
     setError("");
-    if (newPassword !== confirmPassword) {
-      setError("Passwords do not match");
+
+    if (
+      newPassword.length < 8
+    ) {
+      setError(
+        "Password must be at least 8 characters."
+      );
+
       return;
     }
+
+    if (
+      newPassword !==
+      confirmPassword
+    ) {
+      setError(
+        "Passwords do not match."
+      );
+
+      return;
+    }
+
     setLoading(true);
+
     try {
-      await base44.auth.resetPassword({ resetToken, newPassword });
-      window.location.href = "/login";
+      await apiPost(
+        "/auth/reset-password",
+        {
+          token:
+            resetToken,
+
+          new_password:
+            newPassword,
+        }
+      );
+
+      setSuccess(true);
+
+      window.setTimeout(
+        () => {
+          navigate(
+            "/login",
+            {
+              replace: true,
+            }
+          );
+        },
+        1500
+      );
+
     } catch (err) {
-      setError(err.message || "Failed to reset password");
+      console.error(
+        "RESET PASSWORD ERROR:",
+        err
+      );
+
+      setError(
+        err?.message ||
+          "Failed to reset password"
+      );
+
     } finally {
       setLoading(false);
     }
   };
 
+
+  // ============================================================
+  // INVALID LINK
+  // ============================================================
+
   if (!resetToken) {
     return (
       <AuthLayout
-        icon={AlertTriangle}
+        icon={
+          AlertTriangle
+        }
         title="Invalid reset link"
         subtitle="This password reset link is missing or invalid"
         footer={
-          <Link to="/forgot-password" className="text-primary font-medium hover:underline">
+
+          <Link
+            to="/forgot-password"
+            className="font-medium text-primary hover:underline"
+          >
+
             Request a new link
+
           </Link>
+
         }
       >
-        <p className="text-sm text-foreground text-center">
-          The link you used appears to be incomplete. Please request a new password reset email.
+
+        <p className="text-center text-sm text-foreground">
+
+          The link appears to be
+          incomplete. Please request
+          a new password reset.
+
         </p>
+
       </AuthLayout>
     );
   }
+
+
+  // ============================================================
+  // SUCCESS
+  // ============================================================
+
+  if (success) {
+    return (
+      <AuthLayout
+        icon={CheckCircle2}
+        title="Password changed"
+        subtitle="Your password has been updated successfully"
+      >
+
+        <div className="text-center">
+
+          <CheckCircle2 className="mx-auto h-10 w-10 text-emerald-600" />
+
+          <p className="mt-4 text-sm text-muted-foreground">
+
+            Redirecting to login...
+
+          </p>
+
+        </div>
+
+      </AuthLayout>
+    );
+  }
+
+
+  // ============================================================
+  // FORM
+  // ============================================================
 
   return (
     <AuthLayout
@@ -59,56 +228,127 @@ export default function ResetPassword() {
       title="New password"
       subtitle="Enter your new password below"
     >
+
       {error && (
-        <div className="mb-4 p-3 rounded-lg bg-destructive/10 text-destructive text-sm">
+
+        <div className="mb-4 rounded-lg bg-destructive/10 p-3 text-sm text-destructive">
+
           {error}
+
         </div>
+
       )}
-      <form onSubmit={handleSubmit} className="space-y-4">
+
+      <form
+        onSubmit={
+          handleSubmit
+        }
+        className="space-y-4"
+      >
+
         <div className="space-y-2">
-          <Label htmlFor="password">New Password</Label>
+
+          <Label htmlFor="password">
+
+            New Password
+
+          </Label>
+
           <div className="relative">
-            <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" aria-hidden="true" />
+
+            <Lock
+              className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground"
+              aria-hidden="true"
+            />
+
             <Input
               id="password"
               type="password"
               autoComplete="new-password"
               autoFocus
               placeholder="••••••••"
-              value={newPassword}
-              onChange={(e) => setNewPassword(e.target.value)}
-              className="pl-10 h-12"
+              value={
+                newPassword
+              }
+              onChange={(
+                event
+              ) =>
+                setNewPassword(
+                  event.target.value
+                )
+              }
+              className="h-12 pl-10"
+              minLength={8}
               required
             />
+
           </div>
+
         </div>
+
         <div className="space-y-2">
-          <Label htmlFor="confirm">Confirm Password</Label>
+
+          <Label htmlFor="confirm">
+
+            Confirm Password
+
+          </Label>
+
           <div className="relative">
-            <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" aria-hidden="true" />
+
+            <Lock
+              className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground"
+              aria-hidden="true"
+            />
+
             <Input
               id="confirm"
               type="password"
               autoComplete="new-password"
               placeholder="••••••••"
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-              className="pl-10 h-12"
+              value={
+                confirmPassword
+              }
+              onChange={(
+                event
+              ) =>
+                setConfirmPassword(
+                  event.target.value
+                )
+              }
+              className="h-12 pl-10"
+              minLength={8}
               required
             />
+
           </div>
+
         </div>
-        <Button type="submit" className="w-full h-12 font-medium" disabled={loading}>
+
+        <Button
+          type="submit"
+          className="h-12 w-full font-medium"
+          disabled={loading}
+        >
+
           {loading ? (
             <>
-              <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+
               Resetting...
+
             </>
           ) : (
+
             "Reset password"
+
           )}
+
         </Button>
+
       </form>
+
     </AuthLayout>
   );
 }

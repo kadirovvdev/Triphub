@@ -1,4 +1,4 @@
-// TripHub shared helpers — pure functions used across pages and components.
+// TripNet shared helpers — pure functions used across pages and components.
 
 export function slugify(str) {
   return String(str || "")
