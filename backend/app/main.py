@@ -1,3 +1,4 @@
+import os
 from pathlib import Path
 
 from fastapi import FastAPI
@@ -53,10 +54,11 @@ UPLOAD_ROOT = Path(
     "uploads"
 )
 
-UPLOAD_ROOT.mkdir(
-    parents=True,
-    exist_ok=True,
-)
+if not os.getenv("VERCEL"):
+    UPLOAD_ROOT.mkdir(
+        parents=True,
+        exist_ok=True,
+    )
 
 
 app = FastAPI(
